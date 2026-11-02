@@ -101,3 +101,15 @@ Licence texts are in `samuel/ui/fonts/`.
 - One shared animation clock (30 fps while active, lower when idle, stopped when minimised) instead of a timer per widget.
 - Static layers (background grid, vignette, tick ring with degree labels) are rendered once into pixmaps and re-used.
 - Glow is faked with 2–3 stacked strokes of decreasing alpha rather than real blur.
+- Two extra savings added after profiling: the fixed outer ring is baked into the static
+  pixmap after boot, and the reactor coils are drawn once and only rotated afterwards
+  (reactor frame went from ~6.7 ms to ~4.8 ms in software rendering on the build machine).
+- Three frame rates: 30 fps while listening/thinking/speaking, 15 fps idle, 8 fps
+  "standby" after 45 s without activity. `--lite` (or `"lite": true`) drops the radar
+  sweep and bloom strokes and uses 20/10/5 fps.
+
+**Measured** (offscreen Qt, 1600×900, `tools/capture_screens.py`, 8-core Xeon VM. Not measured on
+the E5410 itself; a 2010 laptop CPU will need a larger share): about 100–110 MB RSS for the whole app,
+~12 % of one core idle at 15 fps, ~7.5 % in standby. At 1366×768: ~9 % idle, ~6 % standby,
+~5.6 % idle in `--lite`.
+
