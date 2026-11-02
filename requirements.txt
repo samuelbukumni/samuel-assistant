@@ -1,8 +1,14 @@
-PyQt6
+# S.A.M.U.E.L. v5 (python -m samuel) — required
+PyQt6>=6.4
+psutil
+requests
+
+# Voice input — optional, the HUD falls back to typed commands without them
+# (pyaudio needs: sudo apt install portaudio19-dev)
 vosk
 pyaudio
-psutil
-wikipedia
-requests
 SpeechRecognition
+
+# Only used by the legacy samuel_v4.py
+wikipedia
 pyautogui
