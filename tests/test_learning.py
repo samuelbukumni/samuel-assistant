@@ -108,3 +108,16 @@ class StoreTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SampleLessonTests(unittest.TestCase):
+    def test_bundled_lesson_is_quizzable(self):
+        from samuel.learning import sample
+        lesson = L.build_lesson(sample.TOPIC, sample.TITLE, sample.DESCRIPTION, sample.TEXT)
+        self.assertGreaterEqual(len(L.make_cards(lesson)), 5)
+        self.assertGreaterEqual(len(L.make_questions(lesson, rng=random.Random(1))), 4)
+
+    def test_numbers_inside_words_are_not_blanked(self):
+        terms = L.key_terms("The SM-2 algorithm was published in 1987.", "x")
+        self.assertIn("1987", terms)
+        self.assertNotIn("2", terms)

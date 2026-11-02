@@ -24,6 +24,7 @@ from samuel.core.telemetry import Telemetry, spoken_duration
 from samuel.core.weather import Weather, spoken as spoken_weather
 from samuel.learning import lessons as L
 from samuel.learning.store import Store, stamp
+from samuel.core.bus import thread_target
 
 HELP = [
     ("Learning", "teach me <topic> · next · repeat · quiz me · review flashcards · my progress"),
@@ -65,7 +66,7 @@ class Brain:
         self.review_cards = []
         self.r_index = 0
         self.r_revealed = False
-        self._thread = threading.Thread(target=self._loop, name="brain", daemon=True)
+        self._thread = threading.Thread(target=thread_target(self._loop), name="brain", daemon=True)
 
     # ── lifecycle ────────────────────────────────────────────────────
     def start(self) -> None:
@@ -437,7 +438,7 @@ class Brain:
         answer = " ".join(sentences[:2])
         self._append_note(f"\n## {r['title']} ({stamp()})\n{answer}\n")
         self.sys(f"Source: {r['url']}")
-        self.say(answer + f" Say 'teach me {query}' for a full lesson.")
+        self.say(answer + f" Say 'teach me about {query}' for a full lesson.")
 
     # ── learning ─────────────────────────────────────────────────────
     def _push_learning(self) -> None:
@@ -702,6 +703,19 @@ class Brain:
                  f"{st['reviews_today']} reviews today.")
 
     # ── boot greeting ────────────────────────────────────────────────
+    def _do_sample_lesson(self) -> None:
+        """Load the bundled offline lesson (used by the demo tour)."""
+        from samuel.learning import sample
+        lesson = L.build_lesson(sample.TOPIC, sample.TITLE, sample.DESCRIPTION, sample.TEXT)
+        cards = L.make_cards(lesson)
+        self.lesson_id = self.store.save_lesson(lesson, cards)
+        self.lesson, self.lesson_pos, self.mode = lesson, 0, "lesson"
+        self.questions = []
+        self.sys(f"Built-in lesson loaded  ·  {len(cards)} flashcards created")
+        self._push_lesson()
+        self._push_learning()
+        self.say(f"Lesson: {lesson.title}. {len(lesson.points)} points. {lesson.points[0]}")
+
     def _do_boot_greeting(self) -> None:
         hour = datetime.now().hour
         msg = self.persona.line("greet", hon=self.hon, tod=personas.time_of_day(hour))

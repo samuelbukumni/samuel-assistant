@@ -19,6 +19,7 @@ import time
 from typing import Callable, Optional
 
 from samuel.voice.audio import level, resample
+from samuel.core.bus import thread_target
 
 VOSK_RATE = 16000
 COMMAND_WINDOW = 8.0
@@ -45,7 +46,7 @@ class Listener:
         self.bus.listening.emit(True)
 
     def start(self) -> None:
-        threading.Thread(target=self._run, name="stt", daemon=True).start()
+        threading.Thread(target=thread_target(self._run), name="stt", daemon=True).start()
 
     def stop(self) -> None:
         self._running = False

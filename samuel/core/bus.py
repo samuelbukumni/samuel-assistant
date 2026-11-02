@@ -23,3 +23,17 @@ class Bus(QObject):
     weather = pyqtSignal(dict)
     voice_status = pyqtSignal(dict)     # {"stt": "...", "tts": "...", "llm": "..."}
     ui = pyqtSignal(str, object)        # HUD actions: fullscreen, minimize, quit, screenshot
+
+
+def thread_target(fn):
+    """Wrap a background thread's main function so it ends quietly when the
+    app is shutting down (Qt has already deleted the Bus it emits on)."""
+    def run(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except RuntimeError as exc:
+            if "has been deleted" in str(exc):
+                return None
+            raise
+    run.__name__ = getattr(fn, "__name__", "run")
+    return run

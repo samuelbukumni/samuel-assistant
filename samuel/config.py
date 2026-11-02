@@ -65,7 +65,8 @@ class Settings:
 
     # HUD
     fps: int = 30
-    idle_fps: int = 20
+    idle_fps: int = 15
+    lite: bool = False          # older laptops: no radar sweep or bloom, 20/10 fps
     start_fullscreen: bool = False
     boot_sequence: bool = True
 
@@ -105,9 +106,14 @@ def load_settings(path: Optional[Path] = None) -> Settings:
     return settings
 
 
-def write_example_config(path: Path) -> None:
-    """Write every setting with its default so it is easy to edit."""
+def write_example_config(path: Path) -> Path:
+    """Write every setting with its default so it is easy to edit.
+    Never overwrites an existing file."""
+    path = Path(path)
+    if path.exists():
+        raise SystemExit(f"{path} already exists; edit it or delete it first.")
     data = asdict(Settings())
     data.pop("load_error", None)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    return path

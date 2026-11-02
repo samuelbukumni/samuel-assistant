@@ -111,7 +111,7 @@ def key_terms(sentence: str, title: str) -> List[str]:
     body = sentence
     terms: List[str] = []
 
-    for m in re.finditer(r"\b(1[0-9]{3}|20[0-9]{2}|\d+(?:[.,]\d+)?(?:\s?(?:%|percent|km|kg|million|billion|degrees))?)\b", body):
+    for m in re.finditer(r"(?<![\w.-])(1[0-9]{3}|20[0-9]{2}|\d+(?:[.,]\d+)?(?:\s?(?:%|percent|km|kg|million|billion|degrees))?)\b", body):
         terms.append(m.group(0))
 
     for m in re.finditer(r"\b([A-Z][a-z]+(?:\s+(?:of|de|von|van|the)?\s*[A-Z][a-z]+)*)\b", body):

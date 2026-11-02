@@ -26,6 +26,7 @@ import time
 from typing import Optional
 
 from samuel.voice.audio import level
+from samuel.core.bus import thread_target
 
 
 def _sample_rate(model: str, default: int = 22050) -> int:
@@ -49,7 +50,7 @@ class Speaker:
         self.persona = settings.persona
         self._piper_flag = "--output_raw"
         self._detect()
-        threading.Thread(target=self._worker, name="tts", daemon=True).start()
+        threading.Thread(target=thread_target(self._worker), name="tts", daemon=True).start()
 
     # ── detection ────────────────────────────────────────────────────
     def _piper_exe(self) -> Optional[str]:

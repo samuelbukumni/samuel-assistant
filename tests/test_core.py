@@ -82,3 +82,25 @@ class MiscTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ShutdownTests(unittest.TestCase):
+    def test_thread_target_swallows_only_deleted_object_errors(self):
+        from samuel.core.bus import thread_target
+
+        def gone():
+            raise RuntimeError("wrapped C/C++ object of type Bus has been deleted")
+
+        def bug():
+            raise RuntimeError("real bug")
+        self.assertIsNone(thread_target(gone)())
+        with self.assertRaises(RuntimeError):
+            thread_target(bug)()
+
+    def test_write_config_never_overwrites(self):
+        from samuel.config import write_example_config
+        with tempfile.TemporaryDirectory() as d:
+            p = write_example_config(Path(d) / "c.json")
+            self.assertTrue(p.exists())
+            with self.assertRaises(SystemExit):
+                write_example_config(p)

@@ -116,6 +116,19 @@ class Telemetry:
         }
 
 
+def top_processes(n: int = 4, key: str = "mem") -> list:
+    """Heaviest processes right now: [{name, cpu, mem_mb}], sorted by RAM (or CPU)."""
+    rows = []
+    for proc in psutil.process_iter(["name", "memory_info"]):
+        try:
+            mem = proc.info["memory_info"].rss / 2**20 if proc.info["memory_info"] else 0.0
+            rows.append({"name": proc.info["name"] or "?", "cpu": proc.cpu_percent(None), "mem_mb": mem})
+        except (psutil.Error, AttributeError):
+            continue
+    rows.sort(key=lambda r: r["mem_mb" if key == "mem" else "cpu"], reverse=True)
+    return rows[:n]
+
+
 def _sysfs_battery() -> Optional[Dict]:
     """v4's fallback: read /sys/class/power_supply/BAT0 directly."""
     base = "/sys/class/power_supply/BAT0"
