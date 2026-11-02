@@ -1,0 +1,13 @@
+{
+  "size": "1600x900",
+  "idle_cpu_percent_of_one_core": 11.8,
+  "idle_frames_per_s": 15.0,
+  "idle_window_s": 5.0,
+  "idle_rss_mb": 101.8,
+  "standby_cpu_percent_of_one_core": 7.5,
+  "standby_frames_per_s": 8.0,
+  "standby_window_s": 8.0,
+  "standby_rss_mb": 109.0,
+  "threads": 8,
+  "platform": "offscreen"
+}
