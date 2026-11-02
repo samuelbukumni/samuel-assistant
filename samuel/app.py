@@ -246,7 +246,7 @@ class Samuel:
         elif name == "quit":
             QTimer.singleShot(int((arg or 0) * 1000), self.quit)
         elif name == "screenshot":
-            self._on_action("screenshot", None)
+            self._screen_capture()
         elif name in ("fullscreen", "windowed", "minimize"):
             self.hud.window_action(name)
         elif name == "demo":
@@ -267,9 +267,9 @@ class Samuel:
             self.brain.call(name)
         elif name == "stop_speaking":
             self.speaker.stop()
-        elif name == "screenshot":
+        elif name == "screenshot":          # Ctrl+S: just the HUD window
             path = self.hud.save_screenshot(Path(self.s.screenshot_dir))
-            self.bus.log.emit("sys", f"Screenshot saved: {path}")
+            self.bus.log.emit("sys", f"HUD screenshot saved: {path}")
         elif name == "demo":
             from samuel.demo import DemoDriver
             if not getattr(self, "_demo", None) or not self._demo.running:
@@ -281,6 +281,23 @@ class Samuel:
                 QTimer.singleShot(4500, lambda: self._on_action("demo", None))
         elif name == "quit":
             self.quit()
+
+    def _screen_capture(self):
+        """Voice 'take a screenshot': the whole screen, like v4 (Qt first, then CLI tools)."""
+        folder = Path(self.s.screenshot_dir)
+        folder.mkdir(parents=True, exist_ok=True)
+        path = folder / time.strftime("Screenshot_%Y%m%d_%H%M%S.png")
+        screen = QGuiApplication.primaryScreen()
+        pix = screen.grabWindow(0) if screen else None
+        ok = bool(pix and not pix.isNull() and pix.save(str(path)))
+        if not ok:
+            from samuel.core import system_control
+            ok = system_control.screenshot_fallback(str(path))
+        if ok:
+            self.bus.log.emit("sys", f"Screenshot saved: {path}")
+            self.bus.say.emit("Screenshot saved.")
+        else:
+            self.bus.log.emit("warn", "Couldn't capture the screen here (Wayland?). Install gnome-screenshot or grim.")
 
     def quit(self):
         if self.listener:

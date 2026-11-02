@@ -3,7 +3,7 @@
 Settings live in ~/.config/samuel/config.json (override with SAMUEL_CONFIG).
 Any key you leave out keeps its default, so the file can be tiny, e.g.
 
-    {"weather_city": "Ile-Ife", "persona": "friday"}
+    {"weather_city": "London", "persona": "friday"}
 
 Secrets are never read from this file. The optional cloud LLM key is read
 from the environment variable named by `llm_key_env`.
